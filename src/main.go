@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/NenfuAT/xr-project-xrStudyWatch-back/lib"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	lib.SqlConnect()
 }

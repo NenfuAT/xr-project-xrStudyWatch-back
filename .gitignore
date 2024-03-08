@@ -2,3 +2,5 @@
 .env
 #db
 docker/postgres/data/
+#
+src/conf/environments/
