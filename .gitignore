@@ -1,0 +1,4 @@
+#環境変数
+.env
+#db
+docker/postgres/data/
