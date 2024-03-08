@@ -15,7 +15,6 @@ services:
 
   golang:
     container_name: xr_studywatch-go-api
-    platform: linux/x86_64
     hostname: localhost
     tty: true
     build:
