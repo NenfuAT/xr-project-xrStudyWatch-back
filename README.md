@@ -2,11 +2,19 @@
 
 ## 実行方法
 ### コンテナの立ち上げ
-`make up`
+```shell
+make up
+```
 ### GOコンテナに入る
-`make go`
+```shell
+make go
+```
 ### (例)main.go
-`go run main.go`
+```shell
+go run main.go
+```
 ## その他
-DBコンテナに入る
-`make db`
+### DBコンテナに入る
+```shell
+make db
+```
