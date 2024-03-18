@@ -12,7 +12,7 @@ CREATE TABLE users (
 );
 
 -- universitiesテーブル
-CREATE TABLE universities　(
+CREATE TABLE universities (
     id VARCHAR(26) PRIMARY KEY,
     -- 大学のID(既存)
     university_id VARCHAR(26),
@@ -24,7 +24,7 @@ CREATE TABLE undergraduates (
     id VARCHAR(26) PRIMARY KEY,
     university_id VARCHAR(26) REFERENCES universities(id),
     name VARCHAR(50),
-    department　VARCHAR(50),
+    department VARCHAR(50),
     major VARCHAR(50)
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE laboratories (
     undergraduate_id VARCHAR REFERENCES undergraduates(id),
     location_id VARCHAR REFERENCES locations(id),
     name VARCHAR(50),
-    homepage VARCHAR(50),
+    homepage VARCHAR(50)
 
 );
 
