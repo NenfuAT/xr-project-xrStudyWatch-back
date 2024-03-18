@@ -9,3 +9,10 @@ type User struct {
 	Occupation string `json:"occupation"`
 	Password   string `json:"password"`
 }
+
+func InsertUser(u User) error {
+	if err := db.Create(&u).Error; err != nil {
+		return err
+	}
+	return nil
+}

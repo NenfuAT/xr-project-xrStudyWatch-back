@@ -8,3 +8,10 @@ type Laboratory struct {
 	Name            string `json:"name"`
 	Homepage        string `json:"homepage"`
 }
+
+func InsertLaboratory(l Laboratory) error {
+	if err := db.Create(&l).Error; err != nil {
+		return err
+	}
+	return nil
+}

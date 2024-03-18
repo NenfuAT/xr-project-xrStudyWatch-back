@@ -7,3 +7,10 @@ type Object struct {
 	Height int    `json:"height"`
 	Size   int    `json:"size"`
 }
+
+func InsertObject(o Object) error {
+	if err := db.Create(&o).Error; err != nil {
+		return err
+	}
+	return nil
+}

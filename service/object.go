@@ -12,4 +12,12 @@ func CreateObject(req controller.ObjectPost) error {
 	var laboratory model.Laboratory
 	var location model.Location
 
+	u := req.university
+	l := req.laboratory
+
+	//locationsテーブル
+	location.Building = l.Location
+	location.Room = l.RoomNum
+
+	return nil
 }
