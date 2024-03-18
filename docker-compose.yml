@@ -1,6 +1,6 @@
 services: 
   postgres:
-    container_name: Xr_Studywatch_DB
+    container_name: ${POSTGRES_CONTAINER_HOST}
     image: postgres:15
     restart: always
     ports:
@@ -14,8 +14,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
 
   golang:
-    container_name: xr_studywatch-go-api
-    hostname: localhost
+    container_name: ${GO_CONTAINER_HOST}
+    hostname: ${GO_HOST}
     tty: true
     build:
       context: .
