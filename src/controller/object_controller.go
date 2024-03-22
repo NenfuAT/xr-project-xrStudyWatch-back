@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"mime/multipart"
 	"net/http"
 
 	"github.com/NenfuAT/xr-project-xrStudyWatch-back/service"
@@ -8,13 +9,35 @@ import (
 )
 
 func PostObject(c *gin.Context) {
+
+	uid := "hoge"
+
 	var req ObjectPost
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.Bind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := service.CreateObject(req); err != nil {
+	var fileHeaders []*multipart.FileHeader
+
+	// "objectFile" フィールドから画像ファイルを取得
+	imageFile, imageHeader, err := c.Request.FormFile("objectFile")
+	if err != nil {
+		// エラーハンドリング
+	}
+	defer imageFile.Close()
+
+	// "rawDataFile" フィールドから CSV ファイルを取得
+	csvFile, csvHeader, err := c.Request.FormFile("rawDataFile")
+	if err != nil {
+		// エラーハンドリング
+	}
+	defer csvFile.Close()
+
+	// ファイルのヘッダーを作成してスライスに追加
+	fileHeaders = append(fileHeaders, imageHeader, csvHeader)
+
+	if err := service.CreateObject(uid, req, fileHeaders); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
