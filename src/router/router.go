@@ -1,7 +1,9 @@
 package router
 
 import (
+	"fmt"
 	"io"
+	"net/http"
 	"os"
 
 	"github.com/NenfuAT/xr-project-xrStudyWatch-back/controller"
@@ -16,8 +18,15 @@ func Init() {
 
 	r := gin.Default()
 	r.Use(cors.Default())
-
+	r.GET("/hello", func(c *gin.Context) {
+		c.String(http.StatusOK, "Hello World!!")
+	})
 	r.POST("/api/object/create", controller.PostObject)
 
-	r.Run(":8084")
+	// サーバーの起動状態を表示しながら、ポート8084でサーバーを起動する
+	if err := r.Run(":8084"); err != nil {
+		fmt.Println("サーバーの起動に失敗しました:", err)
+	} else {
+		fmt.Println("サーバーが正常に起動しました。")
+	}
 }

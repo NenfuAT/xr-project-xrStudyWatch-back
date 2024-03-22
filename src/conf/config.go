@@ -9,6 +9,11 @@ func init() {
 	f.SetConfigType("yaml")
 	f.SetConfigName("postgres")
 	f.AddConfigPath("conf/environments/")
+
+	m = viper.New()
+	m.SetConfigType("yaml")
+	m.SetConfigName("proxy")
+	m.AddConfigPath("conf/environments/")
 }
 
 func GetPostgresConfig() *viper.Viper {
@@ -16,4 +21,11 @@ func GetPostgresConfig() *viper.Viper {
 		return nil
 	}
 	return f
+}
+
+func GetProxyConfig() *viper.Viper {
+	if err := m.ReadInConfig(); err != nil {
+		return nil
+	}
+	return m
 }

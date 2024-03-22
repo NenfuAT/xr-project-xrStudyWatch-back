@@ -1,4 +1,4 @@
-package controller
+package common
 
 // クライアント->アプリサーバ
 type ObjectPost struct {

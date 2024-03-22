@@ -5,11 +5,9 @@ import (
 	"io"
 	"mime/multipart"
 	"strconv"
-
-	"github.com/NenfuAT/xr-project-xrStudyWatch-back/controller"
 )
 
-func CreatePostObjectBody(object controller.ObjectPostProxy, fileHeader *multipart.FileHeader) (*bytes.Buffer, string, error) {
+func CreatePostObjectBody(object ObjectPostProxy, fileHeader *multipart.FileHeader) (*bytes.Buffer, string, error) {
 	body := &bytes.Buffer{}
 	mw := multipart.NewWriter(body)
 

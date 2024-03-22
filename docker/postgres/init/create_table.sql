@@ -41,8 +41,7 @@ CREATE TABLE laboratories (
     user_id VARCHAR(26) REFERENCES users(id),
     undergraduate_id INTEGER REFERENCES undergraduates(id),
     location_id INTEGER REFERENCES locations(id),
-    name VARCHAR(50),
-    homepage VARCHAR(50)
+    name VARCHAR(50)
 
 );
 

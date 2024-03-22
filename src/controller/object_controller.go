@@ -4,6 +4,7 @@ import (
 	"mime/multipart"
 	"net/http"
 
+	"github.com/NenfuAT/xr-project-xrStudyWatch-back/common"
 	"github.com/NenfuAT/xr-project-xrStudyWatch-back/service"
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +13,7 @@ func PostObject(c *gin.Context) {
 
 	uid := "hoge"
 
-	var req ObjectPost
+	var req common.ObjectPost
 
 	if err := c.Bind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
