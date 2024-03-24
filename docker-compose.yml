@@ -24,3 +24,5 @@ services:
       - ./src:/go/src/app
     depends_on:
       - "postgres"
+    ports:
+      - 8084:8084

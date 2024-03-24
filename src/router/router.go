@@ -21,12 +21,13 @@ func Init() {
 	r.GET("/hello", func(c *gin.Context) {
 		c.String(http.StatusOK, "Hello World!!")
 	})
+	r.POST("/api/user/create", controller.PostUser)
 	r.POST("/api/object/create", controller.PostObject)
 
 	// サーバーの起動状態を表示しながら、ポート8084でサーバーを起動する
-	if err := r.Run(":8084"); err != nil {
+	if err := r.Run("0.0.0.0:8084"); err != nil {
 		fmt.Println("サーバーの起動に失敗しました:", err)
 	} else {
-		fmt.Println("サーバーが正常に起動しました。")
+		fmt.Println("サーバーが正常に起動しました。ポート8084で待機しています。")
 	}
 }

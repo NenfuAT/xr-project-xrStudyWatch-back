@@ -1,14 +1,19 @@
 package service
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"math/big"
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/NenfuAT/xr-project-xrStudyWatch-back/common"
 	"github.com/NenfuAT/xr-project-xrStudyWatch-back/conf"
@@ -24,90 +29,94 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 	var location model.Location
 	var object_post_proxy common.ObjectPostProxy
 
-	u := req.University
-	l := req.Laboratory
-
 	image_extension := filepath.Ext(fileheaders[0].Filename)
-
+	image_extension = strings.TrimPrefix(image_extension, ".")
 	//プロキシサーバー用
 	object_post_proxy.UserID = uid
 	object_post_proxy.Extension = image_extension
-	object_post_proxy.SpotName = l.Name
-	object_post_proxy.Floor = 0              //Todo入力あったら返すようにするとりあえず0
-	object_post_proxy.LocationType = "indor" //Todoとりあえず(ry
+	object_post_proxy.SpotName = req.Laboratory
+	object_post_proxy.Floor = 3               //Todo入力あったら返すようにするとりあえず0
+	object_post_proxy.LocationType = "indoor" //Todoとりあえず(ry
 
-	object_post_proxy.Latitude = l.Latitude
-	object_post_proxy.Longitude = l.Longitude
+	object_post_proxy.Latitude = req.Latitude
+	object_post_proxy.Longitude = req.Longitude
 
 	body, contentType, err := common.CreatePostObjectBody(object_post_proxy, fileheaders[1])
 	if err != nil {
-		panic(err)
+		fmt.Println("CreateBodyError:", err)
 	}
 
 	send, err := http.NewRequest("POST", c.GetString("proxy.objectUpload"), body)
 	if err != nil {
-		panic(err)
+		fmt.Println("SendError:", err)
 	}
+	// ベーシック認証の文字列を作成
+	authString := c.GetString("proxy.ACCESS_KEY") + ":" + c.GetString("proxy.SECRET_KEY")
+
+	// Base64エンコード
+	authEncoded := base64.StdEncoding.EncodeToString([]byte(authString))
 	send.Header.Set("Content-Type", contentType)
+	send.Header.Set("Authorization", "Basic "+authEncoded)
+
+	fmt.Println("Request Line:", send.Method, send.URL)
 
 	// HTTPリクエストを実行します
 	client := http.Client{}
 	resp, err := client.Do(send)
 	if err != nil {
-		panic(err)
+		fmt.Println("RequestError:", err)
 	}
 	defer resp.Body.Close()
 
 	// レスポンスのボディを読み取ります
 	res, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		fmt.Println("ReadError:", err)
 	}
-
-	var response common.ObjectPostProxyResponse
+	var response common.ObjectUploadResponse
+	fmt.Println("Response Body:", string(res))
 	err = json.Unmarshal(res, &response)
 	if err != nil {
-		panic(err)
+		fmt.Println("JsonError:", err)
 	}
-
 	//university
-	university.Name = u.Name
+	university.Name = req.University
 	university.UniversityID = ""
 
 	model.InsertUniversity(university)
 
 	//undergraduate
-	undergraduate.Name = u.Undergraduate
-	universityId, err := model.GetUniversityIdByName(u.Name)
+	undergraduate.Name = req.Undergraduate
+	universityId, err := model.GetUniversityIdByName(req.University)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
 	}
 	undergraduate.UniversityID = universityId
-	undergraduate.Department = u.Department
-	undergraduate.Major = u.Major
+	undergraduate.Department = req.Department
+	undergraduate.Major = req.Major
 
 	model.InsertUndergraduate(undergraduate)
 
 	//location
-	location.Building = l.Location
-	location.Room = l.RoomNum
+	location.Building = req.Location
+	location.Room = req.RoomNum
 
 	model.InsertLocation(location)
 
 	//laboratory
 	laboratory.ID = response.Spot.ID
 	laboratory.UserID = uid
-	undergraduateId, err := model.GetUndergraduateIdByName(u.Name, universityId)
+	undergraduateId, err := model.GetUndergraduateIdByName(req.Undergraduate, universityId)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
 	}
 	laboratory.UndergraduateID = undergraduateId
-	locationId, err := model.GetLocationIdByName(l.Location)
+	locationId, err := model.GetLocationIdByName(req.Location)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error:", err)
 	}
 	laboratory.LocationID = locationId
-	laboratory.Name = l.Name
+	laboratory.Name = req.Laboratory
 	model.InsertLaboratory(laboratory)
 
 	//object
@@ -115,16 +124,17 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 	object.LabID = response.Spot.ID
 	object.Height = 0
 
-	file, err := fileheaders[1].Open()
+	file, err := fileheaders[0].Open()
 	if err != nil {
-		panic(err)
+		fmt.Println("FileOpenError:", err)
 	}
 	defer file.Close()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
-		panic(err)
+		fmt.Println("ImageError:", err)
 	}
+
 	//画像サイズ
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()

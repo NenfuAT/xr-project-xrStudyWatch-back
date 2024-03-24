@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"mime/multipart"
 	"net/http"
 
@@ -11,27 +12,29 @@ import (
 
 func PostObject(c *gin.Context) {
 
-	uid := "hoge"
+	uid := "01F8VYXK67BGC1F9RP1E4S9YTX"
 
 	var req common.ObjectPost
 
 	if err := c.Bind(&req); err != nil {
+		fmt.Println("Error:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	var fileHeaders []*multipart.FileHeader
 
 	// "objectFile" フィールドから画像ファイルを取得
 	imageFile, imageHeader, err := c.Request.FormFile("objectFile")
 	if err != nil {
-		// エラーハンドリング
+		fmt.Println("GetImgError:", err)
 	}
 	defer imageFile.Close()
 
 	// "rawDataFile" フィールドから CSV ファイルを取得
 	csvFile, csvHeader, err := c.Request.FormFile("rawDataFile")
 	if err != nil {
-		// エラーハンドリング
+		fmt.Println("Error:", err)
 	}
 	defer csvFile.Close()
 

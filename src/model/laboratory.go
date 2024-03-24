@@ -6,7 +6,6 @@ type Laboratory struct {
 	UndergraduateID uint64 `json:"undergraduateId"`
 	LocationID      uint64 `json:"locationId"`
 	Name            string `json:"name"`
-	Homepage        string `json:"homepage"`
 }
 
 func InsertLaboratory(l Laboratory) error {

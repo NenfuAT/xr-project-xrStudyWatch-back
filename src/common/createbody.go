@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"strconv"
@@ -49,5 +50,8 @@ func CreatePostObjectBody(object ObjectPostProxy, fileHeader *multipart.FileHead
 	// Content-Type ヘッダーを取得
 	contentType := mw.FormDataContentType()
 
+	fmt.Println("Content-Type:", contentType)
+	fmt.Println("Body:")
+	fmt.Println(body.String())
 	return body, contentType, nil
 }

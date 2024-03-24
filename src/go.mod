@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/gin-contrib/cors v1.6.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/spf13/viper v1.18.2
 	gorm.io/driver/postgres v1.5.6
 	gorm.io/gorm v1.25.7
