@@ -4,10 +4,13 @@
 CREATE TABLE users (
     id VARCHAR(26) PRIMARY KEY,
     name VARCHAR(50),
-    mail VARCHAR(255),
+    email VARCHAR(255),
     gender VARCHAR(10),
     age INT,
+    height INT,
+    weight FLOAT,
     occupation VARCHAR(50),
+    address VARCHAR(50),
     password VARCHAR(50)
 );
 

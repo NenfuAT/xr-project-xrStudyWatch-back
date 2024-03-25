@@ -12,7 +12,7 @@ import (
 
 func PostObject(c *gin.Context) {
 
-	uid := "01F8VYXK67BGC1F9RP1E4S9YTX"
+	uid := "01HSQJ53XV375H3CST8NSSNSB2"
 
 	var req common.ObjectPost
 

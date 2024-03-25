@@ -46,7 +46,7 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 		fmt.Println("CreateBodyError:", err)
 	}
 
-	send, err := http.NewRequest("POST", c.GetString("proxy.objectUpload"), body)
+	send, err := http.NewRequest("POST", c.GetString("proxy.objectUpload")+"api/objects/upload", body)
 	if err != nil {
 		fmt.Println("SendError:", err)
 	}

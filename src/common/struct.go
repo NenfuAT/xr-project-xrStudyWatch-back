@@ -2,15 +2,6 @@ package common
 
 // クライアント->アプリサーバ
 
-type UserPost struct {
-	UserName   string `json:"userName"`
-	Mail       string `json:"mail"`
-	Gender     string `json:"gender"`
-	Age        int    `json:"age"`
-	Occupation string `json:"occupation"`
-	Password   string `json:"password"`
-}
-
 type ObjectPost struct {
 	University    string  `form:"university"`
 	Undergraduate string  `form:"undergraduate"`
@@ -32,6 +23,18 @@ type ObjectPostProxy struct {
 	LocationType string  `form:"locationType"`
 	Latitude     float64 `form:"latitude"`
 	Longitude    float64 `form:"longitude"`
+}
+
+type UserUploadResponse struct {
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Email      string  `json:"email"`
+	Gender     string  `json:"gender"`
+	Age        int     `json:"age"`
+	Height     int     `json:"height"`
+	Weight     float32 `json:"weight"`
+	Occupation string  `json:"occupation"`
+	Address    string  `json:"address"`
 }
 
 type ObjectUploadResponse struct {

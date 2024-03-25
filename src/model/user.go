@@ -1,13 +1,16 @@
 package model
 
 type User struct {
-	ID         string `gorm:"primarykey;type:varchar(26)" json:"id"`
-	UserName   string `json:"userName"`
-	Mail       string `json:"mail"`
-	Gender     string `json:"gender"`
-	Age        int    `json:"age"`
-	Occupation string `json:"occupation"`
-	Password   string `json:"password"`
+	ID         string  `gorm:"primarykey;type:varchar(26)" json:"id"`
+	Name       string  `json:"name"`
+	Email      string  `json:"email"`
+	Gender     string  `json:"gender"`
+	Age        int     `json:"age"`
+	Height     int     `json:"height"`
+	Weight     float32 `json:"weight"`
+	Occupation string  `json:"occupation"`
+	Address    string  `json:"address"`
+	Password   string  `json:"password"`
 }
 
 func InsertUser(u User) error {
