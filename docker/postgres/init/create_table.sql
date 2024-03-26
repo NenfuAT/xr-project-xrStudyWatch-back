@@ -52,8 +52,8 @@ CREATE TABLE laboratories (
 CREATE TABLE objects (
     id VARCHAR(26) PRIMARY KEY,
     lab_id VARCHAR(26) REFERENCES laboratories(id),
-    aspect INT,
+    aspect VARCHAR,
     height INT,
-    size INT
+    size VARCHAR
 );
 

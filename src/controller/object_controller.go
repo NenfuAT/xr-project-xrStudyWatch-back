@@ -12,7 +12,7 @@ import (
 
 func PostObject(c *gin.Context) {
 
-	uid := "01HSQJ53XV375H3CST8NSSNSB2"
+	uid := "01HSW90XAGPJPKSM94QBKHR2QD"
 
 	var req common.ObjectPost
 
@@ -46,4 +46,32 @@ func PostObject(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, req)
+}
+
+func SearchObject(c *gin.Context) {
+	uid := "01HSQJ53XV375H3CST8NSSNSB2"
+
+	var req common.SearchPost
+
+	if err := c.Bind(&req); err != nil {
+		fmt.Println("Error:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println("Latitude", req.Latitude)
+	fmt.Println("Longitude", req.Longitude)
+
+	// "rawDataFile" フィールドから CSV ファイルを取得
+	csvFile, csvHeader, err := c.Request.FormFile("rawDataFile")
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	defer csvFile.Close()
+
+	if err := service.SearchObject(uid, req, csvHeader); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, req)
+
 }

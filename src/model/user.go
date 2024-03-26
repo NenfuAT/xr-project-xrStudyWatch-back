@@ -19,3 +19,20 @@ func InsertUser(u User) error {
 	}
 	return nil
 }
+
+func GetUserByEmail(email string) User {
+	var user User
+	result := db.Where("email = ? ", email).First(&user)
+	if result.Error != nil {
+		return User{}
+	}
+	return user
+}
+func GetUserByEmailAndPassword(email, password string) (User, error) {
+	var user User
+	result := db.Where("email = ? AND password = ?", email, password).First(&user)
+	if result.Error != nil {
+		return User{}, result.Error
+	}
+	return user, nil
+}

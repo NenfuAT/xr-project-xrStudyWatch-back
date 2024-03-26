@@ -149,3 +149,51 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 	model.InsertObject(object)
 	return nil
 }
+
+func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileHeader) error {
+	c := conf.GetProxyConfig()
+	var search_object_proxy common.SearchPostProxy
+	search_object_proxy.UserID = uid
+	search_object_proxy.Latitude = req.Latitude
+	search_object_proxy.Longitude = req.Longitude
+
+	body, contentType, err := common.CreateSearchObjectBody(search_object_proxy, *fileheader)
+	if err != nil {
+		fmt.Println("CreateBodyError:", err)
+	}
+
+	send, err := http.NewRequest("POST", c.GetString("proxy.objectUpload")+"api/objects/search/spot", body)
+	if err != nil {
+		fmt.Println("SendError:", err)
+	}
+	// ベーシック認証の文字列を作成
+	authString := c.GetString("proxy.ACCESS_KEY") + ":" + c.GetString("proxy.SECRET_KEY")
+
+	// Base64エンコード
+	authEncoded := base64.StdEncoding.EncodeToString([]byte(authString))
+	send.Header.Set("Content-Type", contentType)
+	send.Header.Set("Authorization", "Basic "+authEncoded)
+
+	fmt.Println("Request Line:", send.Method, send.URL)
+
+	// HTTPリクエストを実行します
+	client := http.Client{}
+	resp, err := client.Do(send)
+	if err != nil {
+		fmt.Println("RequestError:", err)
+	}
+	defer resp.Body.Close()
+
+	// レスポンスのボディを読み取ります
+	res, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("ReadError:", err)
+	}
+	var response common.SearchObjectResponse
+	fmt.Println("Response Body:", string(res))
+	err = json.Unmarshal(res, &response)
+	if err != nil {
+		fmt.Println("JsonError:", err)
+	}
+	return nil
+}

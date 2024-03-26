@@ -22,7 +22,9 @@ func Init() {
 		c.String(http.StatusOK, "Hello World!!")
 	})
 	r.POST("/api/user/create", controller.PostUser)
+	r.POST("/api/user/login", controller.LoginUser)
 	r.POST("/api/object/create", controller.PostObject)
+	r.POST("/api/object/around/get", controller.SearchObject)
 
 	// サーバーの起動状態を表示しながら、ポート8084でサーバーを起動する
 	if err := r.Run("0.0.0.0:8084"); err != nil {
