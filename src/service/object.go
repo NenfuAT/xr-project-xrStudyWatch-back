@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -147,10 +148,44 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 	aspectHeight := height / int(gcd.Int64())
 	object.Aspect = strconv.Itoa(aspectWidh) + ":" + strconv.Itoa(aspectHeight)
 	model.InsertObject(object)
+
+	file, err = fileheaders[0].Open()
+	if err != nil {
+		fmt.Println("FileOpenError:", err)
+	}
+	defer file.Close()
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println("ファイルの読み込みに失敗しました:", err)
+		return err
+	}
+
+	fileReader := bytes.NewReader(fileBytes)
+
+	imageupload, err := http.NewRequest("PUT", response.UploadURL, fileReader)
+	if err != nil {
+		fmt.Println("リクエストを作成できません:", err)
+		return err
+	}
+
+	// ヘッダーの設定
+	imageupload.Header.Set("Content-Type", "application/octet-stream")
+
+	// リクエストの送信
+	resp, err = client.Do(imageupload)
+	if err != nil {
+		fmt.Println("リクエストを送信できません:", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	// レスポンスの表示
+	fmt.Println("imageupload:", resp.Status)
 	return nil
 }
 
-func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileHeader) error {
+func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileHeader) (common.SearchObjectResponse, error) {
 	c := conf.GetProxyConfig()
 	var search_object_proxy common.SearchPostProxy
 	search_object_proxy.UserID = uid
@@ -160,12 +195,15 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 	body, contentType, err := common.CreateSearchObjectBody(search_object_proxy, *fileheader)
 	if err != nil {
 		fmt.Println("CreateBodyError:", err)
+		return common.SearchObjectResponse{}, err // エラーを返す
 	}
 
 	send, err := http.NewRequest("POST", c.GetString("proxy.objectUpload")+"api/objects/search/spot", body)
 	if err != nil {
 		fmt.Println("SendError:", err)
+		return common.SearchObjectResponse{}, err // エラーを返す
 	}
+
 	// ベーシック認証の文字列を作成
 	authString := c.GetString("proxy.ACCESS_KEY") + ":" + c.GetString("proxy.SECRET_KEY")
 
@@ -181,6 +219,7 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 	resp, err := client.Do(send)
 	if err != nil {
 		fmt.Println("RequestError:", err)
+		return common.SearchObjectResponse{}, err // エラーを返す
 	}
 	defer resp.Body.Close()
 
@@ -188,12 +227,14 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 	res, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("ReadError:", err)
+		return common.SearchObjectResponse{}, err // エラーを返す
 	}
 	var response common.SearchObjectResponse
 	fmt.Println("Response Body:", string(res))
 	err = json.Unmarshal(res, &response)
 	if err != nil {
 		fmt.Println("JsonError:", err)
+		return common.SearchObjectResponse{}, err // エラーを返す
 	}
-	return nil
+	return response, nil
 }

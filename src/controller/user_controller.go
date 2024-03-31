@@ -21,7 +21,9 @@ func PostUser(c *gin.Context) {
 	user, err := service.CreateUser(req)
 	if err != nil {
 		fmt.Println("Error creating user:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 

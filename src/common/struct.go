@@ -82,3 +82,8 @@ type SearchObjectResponse struct {
 	SpotObjects []Object `json:"spotObjects"`
 	AreaObjects []Object `json:"areaObjects"`
 }
+
+// Error implements error.
+func (s SearchObjectResponse) Error() string {
+	panic("unimplemented")
+}

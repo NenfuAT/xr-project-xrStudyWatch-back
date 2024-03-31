@@ -17,6 +17,35 @@ import (
 func CreateUser(req model.User) (model.User, error) {
 
 	result := model.GetUserByEmail(req.Email)
+
+	if req.Name == "" {
+		return model.User{}, errors.New("no name value")
+	}
+	if req.Occupation == "" {
+		return model.User{}, errors.New("no occupation value")
+	}
+	if req.Email == "" {
+		return model.User{}, errors.New("no email value")
+	}
+	if req.Age == 0 {
+		return model.User{}, errors.New("no age value")
+	}
+	if req.Height == 0 {
+		return model.User{}, errors.New("no height value")
+	}
+	if req.Weight == 0 {
+		return model.User{}, errors.New("no weight value")
+	}
+	if req.Gender == "" {
+		return model.User{}, errors.New("no gender value")
+	}
+	if req.Address == "" {
+		return model.User{}, errors.New("no address value")
+	}
+	if req.Password == "" {
+		return model.User{}, errors.New("no password value")
+	}
+
 	if result.ID != "" {
 		return model.User{}, nil
 	} else {
@@ -58,6 +87,7 @@ func CreateUser(req model.User) (model.User, error) {
 		user.ID = response.ID
 		user.Name = response.Name
 		user.Email = response.Email
+		user.Age = response.Age
 		user.Gender = response.Gender
 		user.Height = response.Height
 		user.Weight = response.Weight

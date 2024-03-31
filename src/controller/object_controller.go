@@ -1,18 +1,46 @@
 package controller
 
 import (
+	"encoding/base64"
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"strings"
 
 	"github.com/NenfuAT/xr-project-xrStudyWatch-back/common"
+	"github.com/NenfuAT/xr-project-xrStudyWatch-back/model"
 	"github.com/NenfuAT/xr-project-xrStudyWatch-back/service"
 	"github.com/gin-gonic/gin"
 )
 
 func PostObject(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(400, gin.H{"error": "Authorization header is missing"})
+		return
+	}
 
-	uid := "01HSW90XAGPJPKSM94QBKHR2QD"
+	// "Basic " 接頭辞を削除して、Base64でエンコードされた文字列を取得
+	authValue := strings.TrimPrefix(authHeader, "Basic ")
+
+	// Base64デコード
+	decoded, err := base64.StdEncoding.DecodeString(authValue)
+	if err != nil {
+		fmt.Println("Error decoding:", err)
+		return
+	}
+
+	// デコードされた文字列を取得
+	credentials := string(decoded)
+
+	// ユーザー名とパスワードの分割
+	split := strings.SplitN(credentials, ":", 2)
+	uid := split[0]
+	result := model.GetUserByID(uid)
+	if result.ID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Authentication failed"})
+		return
+	}
 
 	var req common.ObjectPost
 
@@ -49,8 +77,34 @@ func PostObject(c *gin.Context) {
 }
 
 func SearchObject(c *gin.Context) {
-	uid := "01HSQJ53XV375H3CST8NSSNSB2"
 
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(400, gin.H{"error": "Authorization header is missing"})
+		return
+	}
+
+	// "Basic " 接頭辞を削除して、Base64でエンコードされた文字列を取得
+	authValue := strings.TrimPrefix(authHeader, "Basic ")
+
+	// Base64デコード
+	decoded, err := base64.StdEncoding.DecodeString(authValue)
+	if err != nil {
+		fmt.Println("Error decoding:", err)
+		return
+	}
+
+	// デコードされた文字列を取得
+	credentials := string(decoded)
+
+	// ユーザー名とパスワードの分割
+	split := strings.SplitN(credentials, ":", 2)
+	uid := split[0]
+	result := model.GetUserByID(uid)
+	if result.ID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Authentication failed"})
+		return
+	}
 	var req common.SearchPost
 
 	if err := c.Bind(&req); err != nil {
@@ -68,10 +122,11 @@ func SearchObject(c *gin.Context) {
 	}
 	defer csvFile.Close()
 
-	if err := service.SearchObject(uid, req, csvHeader); err != nil {
+	response, err := service.SearchObject(uid, req, csvHeader)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, req)
+	c.JSON(http.StatusOK, response)
 
 }
