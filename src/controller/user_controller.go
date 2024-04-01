@@ -46,7 +46,8 @@ func LoginUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	fmt.Println("email", req.Email)
+	fmt.Println("password", req.Password)
 	result, err := service.AuthUser(req)
 	if err != nil {
 		fmt.Println("Error Login user:", err)
