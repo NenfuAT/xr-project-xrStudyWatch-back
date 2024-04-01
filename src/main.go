@@ -1,9 +1,7 @@
 package main
 
-import (
-	"github.com/NenfuAT/xr-project-xrStudyWatch-back/lib"
-)
+import "github.com/NenfuAT/xr-project-xrStudyWatch-back/router"
 
 func main() {
-	lib.SqlConnect()
+	router.Init()
 }
