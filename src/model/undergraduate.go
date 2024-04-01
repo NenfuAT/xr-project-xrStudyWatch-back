@@ -22,3 +22,11 @@ func GetUndergraduateIdByName(name string, uId uint64) (uint64, error) {
 	}
 	return u.ID, nil
 }
+
+func GetUndergraduateByID(id uint64) (Undergraduate, error) {
+	var u Undergraduate
+	if err := db.Where("id = ?", id).First(&u).Error; err != nil {
+		return Undergraduate{}, err
+	}
+	return u, nil
+}

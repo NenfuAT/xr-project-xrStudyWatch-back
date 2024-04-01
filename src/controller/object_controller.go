@@ -130,3 +130,42 @@ func SearchObject(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 
 }
+
+func MetaSearchObject(c *gin.Context) {
+
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(400, gin.H{"error": "Authorization header is missing"})
+		return
+	}
+
+	// "Basic " 接頭辞を削除して、Base64でエンコードされた文字列を取得
+	authValue := strings.TrimPrefix(authHeader, "Basic ")
+
+	// Base64デコード
+	decoded, err := base64.StdEncoding.DecodeString(authValue)
+	if err != nil {
+		fmt.Println("Error decoding:", err)
+		return
+	}
+
+	// デコードされた文字列を取得
+	credentials := string(decoded)
+
+	// ユーザー名とパスワードの分割
+	split := strings.SplitN(credentials, ":", 2)
+	uid := split[0]
+	result := model.GetUserByID(uid)
+	if result.ID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Authentication failed"})
+		return
+	}
+
+	response, err := service.MetaSearch(uid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, response)
+
+}

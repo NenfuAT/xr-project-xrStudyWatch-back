@@ -83,6 +83,37 @@ type SearchObjectResponse struct {
 	AreaObjects []Object `json:"areaObjects"`
 }
 
+// ArrivingObject 構造体は、到着オブジェクトを表します。
+type ArrivingObject struct {
+	ID      string  `json:"id"`
+	Width   float32 `json:"width"`
+	Height  float32 `json:"height"`
+	Size    string  `json:"size"`
+	ViewURL string  `json:"viewUrl"`
+}
+
+// AroundObject 構造体は、周囲のオブジェクトを表します。
+type AroundObject struct {
+	ID         string `json:"id"`
+	Laboratory struct {
+		Name     string `json:"name"`
+		Location string `json:"location"`
+		RoomNum  string `json:"roomNum"`
+	} `json:"laboratory"`
+	University struct {
+		Name          string `json:"name"`
+		Undergraduate string `json:"undergraduate"`
+		Department    string `json:"department"`
+		Major         string `json:"major"`
+	} `json:"university"`
+}
+
+// Data 構造体は、提供されたJSONデータ全体を表します。
+type SpotResult struct {
+	ArrivingObjects []ArrivingObject `json:"arrivingObjects"`
+	AroundObjects   []AroundObject   `json:"aroundObjects"`
+}
+
 // Error implements error.
 func (s SearchObjectResponse) Error() string {
 	panic("unimplemented")

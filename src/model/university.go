@@ -20,3 +20,11 @@ func GetUniversityIdByName(name string) (uint64, error) {
 	}
 	return u.ID, nil
 }
+
+func GetUniversityByID(id uint64) (University, error) {
+	var u University
+	if err := db.Where("id = ?", id).First(&u).Error; err != nil {
+		return University{}, err
+	}
+	return u, nil
+}

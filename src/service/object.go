@@ -146,7 +146,16 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 	gcd := bigA.GCD(nil, nil, bigA, bigB)
 	aspectWidh := width / int(gcd.Int64())
 	aspectHeight := height / int(gcd.Int64())
-	object.Aspect = strconv.Itoa(aspectWidh) + ":" + strconv.Itoa(aspectHeight)
+	// 大きい方を1として扱う
+	if aspectWidh > aspectHeight {
+		aspectHeight /= aspectWidh
+		aspectWidh /= aspectWidh
+	} else {
+		aspectHeight /= aspectHeight
+		aspectWidh /= aspectHeight
+	}
+	object.Height = float32(aspectHeight)
+	object.Width = float32(aspectWidh)
 	model.InsertObject(object)
 
 	file, err = fileheaders[0].Open()
@@ -185,7 +194,7 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 	return nil
 }
 
-func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileHeader) (common.SearchObjectResponse, error) {
+func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileHeader) (common.SpotResult, error) {
 	c := conf.GetProxyConfig()
 	var search_object_proxy common.SearchPostProxy
 	search_object_proxy.UserID = uid
@@ -195,13 +204,13 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 	body, contentType, err := common.CreateSearchObjectBody(search_object_proxy, *fileheader)
 	if err != nil {
 		fmt.Println("CreateBodyError:", err)
-		return common.SearchObjectResponse{}, err // エラーを返す
+		return common.SpotResult{}, err // エラーを返す
 	}
 
 	send, err := http.NewRequest("POST", c.GetString("proxy.objectUpload")+"api/objects/search/spot", body)
 	if err != nil {
 		fmt.Println("SendError:", err)
-		return common.SearchObjectResponse{}, err // エラーを返す
+		return common.SpotResult{}, err // エラーを返す
 	}
 
 	// ベーシック認証の文字列を作成
@@ -219,7 +228,7 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 	resp, err := client.Do(send)
 	if err != nil {
 		fmt.Println("RequestError:", err)
-		return common.SearchObjectResponse{}, err // エラーを返す
+		return common.SpotResult{}, err // エラーを返す
 	}
 	defer resp.Body.Close()
 
@@ -227,14 +236,113 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 	res, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("ReadError:", err)
-		return common.SearchObjectResponse{}, err // エラーを返す
+		return common.SpotResult{}, err // エラーを返す
 	}
 	var response common.SearchObjectResponse
+
+	var spotresult common.SpotResult
+	var arounds []common.AroundObject
+	var arrivings []common.ArrivingObject
+	for _, spotObj := range response.SpotObjects {
+		var arriving common.ArrivingObject
+		arriving.ID = spotObj.ID
+		object, err := model.GetObjectByID(arriving.ID)
+		if err != nil {
+			fmt.Println("ReadError:", err)
+			return common.SpotResult{}, err
+		}
+		arriving.Height = object.Height
+		arriving.Width = object.Width
+		arriving.Size = object.Size
+		arriving.ViewURL = spotObj.ViewURL
+
+		arrivings = append(arrivings, arriving)
+	}
+
+	for _, areaObj := range response.AreaObjects {
+		var around common.AroundObject
+		around.ID = areaObj.ID
+		object, err := model.GetObjectByID(around.ID)
+		if err != nil {
+			fmt.Println("ReadError:", err)
+			return common.SpotResult{}, err
+		}
+
+		laboratory, err := model.GetLaboratoryByID(object.LabID)
+		if err != nil {
+			fmt.Println("ReadError:", err)
+			return common.SpotResult{}, err
+		}
+
+		location, err := model.GetLocationByID(laboratory.LocationID)
+		if err != nil {
+			fmt.Println("ReadError:", err)
+			return common.SpotResult{}, err
+		}
+
+		undergraduate, err := model.GetUndergraduateByID(laboratory.UndergraduateID)
+		if err != nil {
+			fmt.Println("ReadError:", err)
+			return common.SpotResult{}, err
+		}
+		university, err := model.GetUniversityByID(undergraduate.UniversityID)
+		if err != nil {
+			fmt.Println("ReadError:", err)
+			return common.SpotResult{}, err
+		}
+
+		around.Laboratory.Name = laboratory.Name
+		around.Laboratory.Location = location.Building
+		around.Laboratory.RoomNum = location.Room
+
+		around.University.Name = university.Name
+		around.University.Undergraduate = undergraduate.Name
+		around.University.Department = undergraduate.Department
+		around.University.Major = undergraduate.Major
+		arounds = append(arounds, around)
+	}
+
+	if arrivings == nil {
+		spotresult.ArrivingObjects = []common.ArrivingObject{}
+	} else {
+		spotresult.ArrivingObjects = arrivings
+	}
+
+	if arounds == nil {
+		spotresult.AroundObjects = []common.AroundObject{}
+	} else {
+		spotresult.AroundObjects = arounds
+	}
+
 	fmt.Println("Response Body:", string(res))
 	err = json.Unmarshal(res, &response)
 	if err != nil {
 		fmt.Println("JsonError:", err)
-		return common.SearchObjectResponse{}, err // エラーを返す
+		return common.SpotResult{}, err // エラーを返す
+	}
+
+	jsonStr, err := json.Marshal(spotresult)
+	if err != nil {
+		fmt.Println("JSON変換エラー:", err)
+		return common.SpotResult{}, err
+	}
+	var result model.Result
+	result.UserID = uid
+	result.Json = string(jsonStr)
+	model.InsertOrUpdateResult(result)
+	return spotresult, nil
+}
+
+func MetaSearch(uid string) (common.SpotResult, error) {
+	result, err := model.GetResultByID(uid)
+	if err != nil {
+		fmt.Println("JsonError:", err)
+		return common.SpotResult{}, err // エラーを返す
+	}
+	var response common.SpotResult
+	if err := json.Unmarshal([]byte(result), &response); err != nil {
+		fmt.Println("JSONパースエラー:", err)
+		return common.SpotResult{}, err // エラーを返す
 	}
 	return response, nil
 }

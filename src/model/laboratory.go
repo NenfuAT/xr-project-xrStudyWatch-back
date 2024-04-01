@@ -14,3 +14,11 @@ func InsertLaboratory(l Laboratory) error {
 	}
 	return nil
 }
+
+func GetLaboratoryByID(id string) (Laboratory, error) {
+	var l Laboratory
+	if err := db.Where("id = ?", id).First(&l).Error; err != nil {
+		return Laboratory{}, err
+	}
+	return l, nil
+}

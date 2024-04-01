@@ -20,3 +20,11 @@ func GetLocationIdByName(name string) (uint64, error) {
 	}
 	return l.ID, nil
 }
+
+func GetLocationByID(id uint64) (Location, error) {
+	var l Location
+	if err := db.Where("id = ?", id).First(&l).Error; err != nil {
+		return Location{}, err
+	}
+	return l, nil
+}

@@ -52,8 +52,14 @@ CREATE TABLE laboratories (
 CREATE TABLE objects (
     id VARCHAR(26) PRIMARY KEY,
     lab_id VARCHAR(26) REFERENCES laboratories(id),
-    aspect VARCHAR,
-    height INT,
+    height FLOAT,
+    width FLOAT,
     size VARCHAR
 );
 
+-- resultsテーブル
+
+CREATE TABLE results (
+    user_id VARCHAR(26) PRIMARY KEY REFERENCES users(id),
+    json VARCHAR
+);

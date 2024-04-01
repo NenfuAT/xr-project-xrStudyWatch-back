@@ -116,7 +116,6 @@ func AuthUser(req common.Login) (map[string]string, error) {
 		// ユーザーが見つかった場合の処理
 		jsonObj := make(map[string]string)
 		jsonObj["id"] = user.ID
-		jsonObj["name"] = user.Name
 		return jsonObj, nil
 	} else {
 		// ユーザーが見つからなかった場合
