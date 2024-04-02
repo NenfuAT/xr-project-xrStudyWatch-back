@@ -9,7 +9,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
-	"math/big"
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
@@ -139,23 +138,20 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 	//画像サイズ
 	width := img.Bounds().Dx()
 	height := img.Bounds().Dy()
+	var aspwidth float32
+	var aspheight float32
 	object.Size = strconv.Itoa(width) + "x" + strconv.Itoa(height)
-	//アスペクト比
-	bigA := big.NewInt(int64(width))
-	bigB := big.NewInt(int64(height))
-	gcd := bigA.GCD(nil, nil, bigA, bigB)
-	aspectWidh := width / int(gcd.Int64())
-	aspectHeight := height / int(gcd.Int64())
+
 	// 大きい方を1として扱う
-	if aspectWidh > aspectHeight {
-		aspectHeight /= aspectWidh
-		aspectWidh /= aspectWidh
+	if width > height {
+		aspheight = float32(height) / float32(width)
+		aspwidth = float32(width) / float32(width)
 	} else {
-		aspectHeight /= aspectHeight
-		aspectWidh /= aspectHeight
+		aspheight = float32(height) / float32(height)
+		aspwidth = float32(width) / float32(height)
 	}
-	object.Height = float32(aspectHeight)
-	object.Width = float32(aspectWidh)
+	object.Height = float32(aspheight)
+	object.Width = float32(aspwidth)
 	model.InsertObject(object)
 
 	file, err = fileheaders[0].Open()
@@ -240,9 +236,17 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 	}
 	var response common.SearchObjectResponse
 
+	fmt.Println("Response Body:", string(res))
+	err = json.Unmarshal(res, &response)
+	if err != nil {
+		fmt.Println("JsonError:", err)
+		return common.SpotResult{}, err // エラーを返す
+	}
+
 	var spotresult common.SpotResult
-	var arounds []common.AroundObject
-	var arrivings []common.ArrivingObject
+	var arounds = []common.AroundObject{}
+	var arrivings = []common.ArrivingObject{}
+
 	for _, spotObj := range response.SpotObjects {
 		var arriving common.ArrivingObject
 		arriving.ID = spotObj.ID
@@ -256,6 +260,7 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 		arriving.Size = object.Size
 		arriving.ViewURL = spotObj.ViewURL
 
+		println(arriving.ID)
 		arrivings = append(arrivings, arriving)
 	}
 
@@ -302,24 +307,8 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 		arounds = append(arounds, around)
 	}
 
-	if arrivings == nil {
-		spotresult.ArrivingObjects = []common.ArrivingObject{}
-	} else {
-		spotresult.ArrivingObjects = arrivings
-	}
-
-	if arounds == nil {
-		spotresult.AroundObjects = []common.AroundObject{}
-	} else {
-		spotresult.AroundObjects = arounds
-	}
-
-	fmt.Println("Response Body:", string(res))
-	err = json.Unmarshal(res, &response)
-	if err != nil {
-		fmt.Println("JsonError:", err)
-		return common.SpotResult{}, err // エラーを返す
-	}
+	spotresult.ArrivingObjects = arrivings
+	spotresult.AroundObjects = arounds
 
 	jsonStr, err := json.Marshal(spotresult)
 	if err != nil {
@@ -334,6 +323,7 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 }
 
 func MetaSearch(uid string) (common.SpotResult, error) {
+	println("metaquest")
 	result, err := model.GetResultByID(uid)
 	if err != nil {
 		fmt.Println("JsonError:", err)

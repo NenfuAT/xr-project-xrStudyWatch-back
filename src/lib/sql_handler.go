@@ -16,6 +16,7 @@ func SqlConnect() (database *gorm.DB) {
 	dsn := "host=" + c.GetString("postgres.host") + " user=" + c.GetString("postgres.user") + " password=" + c.GetString("postgres.password") + " dbname=" + c.GetString("postgres.dbname") + " port=" + c.GetString("postgres.port") + " sslmode=disable TimeZone=Asia/Tokyo"
 	dialector := postgres.Open(dsn)
 
+	fmt.Println(dsn)
 	if db, err = gorm.Open(dialector); err != nil {
 		db = connect(dialector, 10)
 	}
