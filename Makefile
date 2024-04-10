@@ -1,13 +1,10 @@
 -include .env
 
-build:
-	docker compose build
-
 up:
-	docker compose up -d
+	docker compose build && docker compose up -d
 
-log:
-	docker compose logs
+logs:
+	docker compose logs -f
 
 db:
 	docker exec -it $(POSTGRES_CONTAINER_HOST) psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
