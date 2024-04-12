@@ -122,6 +122,8 @@ func SearchObject(c *gin.Context) {
 	}
 	defer csvFile.Close()
 
+	println("search")
+
 	response, err := service.SearchObject(uid, req, csvHeader)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

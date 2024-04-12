@@ -13,9 +13,9 @@ func InsertLocation(l Location) error {
 	return nil
 }
 
-func GetLocationIdByName(name string) (uint64, error) {
+func GetLocationIdByNameAndRoom(name string, room string) (uint64, error) {
 	var l Location
-	if err := db.Where("building = ?", name).First(&l).Error; err != nil {
+	if err := db.Where("building = ? AND room", name, room).First(&l).Error; err != nil {
 		return 0, err
 	}
 	return l.ID, nil
