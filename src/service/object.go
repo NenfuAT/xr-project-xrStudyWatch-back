@@ -111,7 +111,7 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 		fmt.Println("Error:", err)
 	}
 	laboratory.UndergraduateID = undergraduateId
-	locationId, err := model.GetLocationIdByNameAndRoom(req.Location)
+	locationId, err := model.GetLocationIdByNameAndRoom(req.Location, req.RoomNum)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
