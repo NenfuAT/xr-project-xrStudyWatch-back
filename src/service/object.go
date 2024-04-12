@@ -111,7 +111,7 @@ func CreateObject(uid string, req common.ObjectPost, fileheaders []*multipart.Fi
 		fmt.Println("Error:", err)
 	}
 	laboratory.UndergraduateID = undergraduateId
-	locationId, err := model.GetLocationIdByName(req.Location)
+	locationId, err := model.GetLocationIdByNameAndRoom(req.Location)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
@@ -323,7 +323,7 @@ func SearchObject(uid string, req common.SearchPost, fileheader *multipart.FileH
 }
 
 func MetaSearch(uid string) (common.SpotResult, error) {
-	println("metaquest")
+	println("metaquest								")
 	result, err := model.GetResultByID(uid)
 	if err != nil {
 		fmt.Println("JsonError:", err)
